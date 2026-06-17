@@ -37,6 +37,9 @@ window.o: src/window.cpp
 	
 # Clean up build files
 clean:
+ifeq ($(OS), Windows_NT)
+	del /f /q $(subst /,\,$(OBJS)) $(TARGET).exe 2>NUL || true
+else
 	rm -f $(OBJS) $(TARGET)
-
+endif
 .PHONY: all clean
