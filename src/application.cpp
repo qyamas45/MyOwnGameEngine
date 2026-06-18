@@ -1,6 +1,6 @@
-#include "window.h"
+#include "application.h"
 
-Window::Window(int width, int height, const char* title){
+Application::Application(int width, int height, const char* title){
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -38,7 +38,7 @@ Window::Window(int width, int height, const char* title){
 
 }
 
-Window::~Window(){
+Application::~Application(){
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
@@ -46,13 +46,13 @@ Window::~Window(){
     glfwTerminate();
 
 }
-void Window::framebuffer_size_callback(GLFWwindow* window, int width, int height)
+void Application::framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
 }
-void Window::mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
+void Application::mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
-    Window* self = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    Application* self = static_cast<Application*>(glfwGetWindowUserPointer(window));
     // Implement mouse movement handling here
     float xpos = static_cast<float>(xposIn);
     float ypos = static_cast<float>(yposIn);
@@ -69,12 +69,12 @@ void Window::mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
     //camera.ProcessMouseMovement(xoffset, yoffset);
 
 }
-void Window::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+void Application::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     // Implement scroll handling here
     //camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
-void Window::processInput(GLFWwindow *window)
+void Application::processInput(GLFWwindow *window)
 {
     // Implement input processing here
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -83,16 +83,24 @@ void Window::processInput(GLFWwindow *window)
 }
 
 //function should run the program
-void Window::run()
+void Application::run()
 {
+    float lastFrame = 0.0f;
     while(!glfwWindowShouldClose(this->window))
     {
-        processInput(this->window);      
+        float currentFrame = static_cast<float>(glfwGetTime());
+        float deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
+        processInput(this->window);
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        //swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+
+        onUpdate(deltaTime);
+        onRender();
+
         glfwSwapBuffers(window);
-        glfwPollEvents();  
+        glfwPollEvents();
     }
     std::cout << "Exiting run loop" << std::endl;
 }

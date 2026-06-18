@@ -7,16 +7,16 @@ CXXFLAGS = -Wall -g -Wextra -std=c++11
 # Linker flags for OpenGL and GLUT
 LDFLAGS = -Llibs -lopengl32 -lglfw3dll
 
-INCLUDES = -Iinclude  
+INCLUDES = -Iinclude -Iinclude/core -Iinclude/game
 
 # Target executable
 TARGET = program
 
 # Source files (objects/*.cpp are #included by main.cpp, not compiled separately)
-SRCS = src/main.cpp glad.c src/winow.cpp
+SRCS = src/main.cpp glad.c src/application.cpp src/obj/ball.cpp
 
 # Object files
-OBJS = src/main.o glad.o src/window.o
+OBJS = src/main.o glad.o src/application.o src/obj/ball.o
 # Default target
 all: $(TARGET)
 
@@ -32,7 +32,7 @@ $(TARGET): $(OBJS)
 glad.o: glad.c
 	$(CC) $(INCLUDES) -c $< -o $@
 
-window.o: src/window.cpp
+%.o: src/%.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 	
 # Clean up build files

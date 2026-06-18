@@ -1,15 +1,15 @@
-#ifndef WINDOW_H
-#define WINDOW_H
+#ifndef APPLICATION_H
+#define APPLICATION_H
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <stdexcept>
 #pragma once
-class Window{
+class Application{
 public:
-    Window(int width, int height, const char* title);
-    ~Window();
+    Application(int width, int height, const char* title);
+    ~Application();
     virtual void onUpdate(float deltaTime) = 0;
     virtual void onRender() = 0;
     void run();
