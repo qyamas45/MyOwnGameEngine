@@ -7,6 +7,8 @@
 #include <memory>
 #include <iostream>
 #include <shader.h>
+#include "camera.h"
+
 
 class Game : public Application {
 public:
@@ -28,6 +30,12 @@ public:
     }
 private:
     std::vector<std::unique_ptr<Entity>> objects;
+    
+     
+Camera camera(glm::vec3(3.0f, 4.0f, 8.0f), 
+              glm::vec3(0.0f, 1.0f, 0.0f), 
+              -90.0f, -45.0f);
+ 
 };
 
 
