@@ -5,12 +5,14 @@
 #include "ball.h"
 #include <vector>
 #include <memory>
-
+#include <iostream>
+#include <shader.h>
 
 class Game : public Application {
 public:
     Game(int width, int height, const char* title) : Application(width, height, title) {
-        objects.push_back(std::unique_ptr<Ball>(new Ball(0.0f, 0.0f, 3.0f, 20.0f)));
+        objects.push_back(std::unique_ptr<Ball>(new Ball(0.0f, 0.0f, 0.2f, 20.0f)));
+        std::cout << "Game initialized with " << objects.size() << " objects." << std::endl;
     }
     void onUpdate(float deltaTime) override {
         // Update game logic here

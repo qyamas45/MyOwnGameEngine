@@ -2,7 +2,7 @@
 #define BALL_H
 #include "entity.h"
 #include "shader.h"
-
+#include <shader.h>
 class Ball : public Entity {
 public:
     Ball(float x, float y, float z, float radius);
@@ -13,7 +13,11 @@ public:
 private:
     unsigned int VAO, VBO;
     float x, y, z, radius;
-    //Shader shader;
+    glm::vec3 position;
+    glm::vec3 rotationAxis;
+    glm::vec3 scale;
+    glm::vec3 color;
+    Shader shader;
     void setupMesh();
 };
 
