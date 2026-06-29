@@ -13,7 +13,7 @@ public:
     Entity() {}
     virtual ~Entity() = default;
     virtual void update(float deltaTime) = 0;
-    virtual void render() = 0;
+    virtual void render(const glm::mat4& view, const glm::mat4& projection) = 0;
 };
 
 #endif

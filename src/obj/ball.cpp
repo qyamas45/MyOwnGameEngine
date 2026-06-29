@@ -43,17 +43,14 @@ void Ball::setupMesh() {
 void Ball::update(float deltaTime) {
     // Update ball position or state if needed
 }
-void Ball::render() {
- 
-    // Render the ball using OpenGL
+void Ball::render(const glm::mat4& view, const glm::mat4& projection) {
     shader.use();
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, position);
     shader.setMat4("model", model);
-    glm::mat4 projection = glm::ortho(-400.0f, 400.0f, -300.0f, 300.0f, -1.0f, 1.0f);
+    shader.setMat4("view", view);
     shader.setMat4("projection", projection);
-
-    shader.setVec3("color", color);  // sends the red color
+    shader.setVec3("color", color);
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 36);
     glBindVertexArray(0);

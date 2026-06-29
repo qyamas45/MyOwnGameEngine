@@ -9,7 +9,7 @@ public:
     ~Ball();
     void draw(Shader&, glm::mat4, glm::mat4);
     void update(float deltaTime) override;
-    void render() override;
+    void render(const glm::mat4& view, const glm::mat4& projection) override;
 private:
     unsigned int VAO, VBO;
     float x, y, z, radius;

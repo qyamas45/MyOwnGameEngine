@@ -13,7 +13,7 @@ INCLUDES = -Iinclude -Iinclude/core -Iinclude/game
 TARGET = program
 
 # Source files (objects/*.cpp are #included by main.cpp, not compiled separately)
-SRCS = src/main.cpp glad.c src/application.cpp src/obj/ball.cpp
+SRCS = src/main.cpp glad.c src/application.cpp src/obj/ball.cpp 
 
 # Object files
 OBJS = src/main.o glad.o src/application.o src/obj/ball.o

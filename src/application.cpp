@@ -1,6 +1,8 @@
 #include "application.h"
-
+#include <direct.h>  // Windows only
 Application::Application(int width, int height, const char* title){
+    
+ 
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -34,12 +36,16 @@ Application::Application(int width, int height, const char* title){
         throw std::runtime_error("Failed to initialize GLAD");
     } 
     glEnable(GL_DEPTH_TEST);
-    //Shader ourShader("shaders/camera.vs", "shaders/camera.fs");
+    ourShader = new Shader("shaders/camera.vs", "shaders/camera.fs");
+    char cwd[256];
+_getcwd(cwd, sizeof(cwd));
+std::cout << "Working dir: " << cwd << std::endl;
+   
 
 }
 
 Application::~Application(){
-
+    delete ourShader;
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
@@ -66,19 +72,30 @@ void Application::mouse_callback(GLFWwindow* window, double xposIn, double yposI
     float yoffset = self->lastY - ypos; // reversed since y-coordinates go from bottom
     self->lastX = xpos;
     self->lastY = ypos;
-    //camera.ProcessMouseMovement(xoffset, yoffset);
+    self->camera.ProcessMouseMovement(xoffset, yoffset);
 
 }
 void Application::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    // Implement scroll handling here
-    //camera.ProcessMouseScroll(static_cast<float>(yoffset));
+    Application* self = static_cast<Application*>(glfwGetWindowUserPointer(window));
+    self->camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
 void Application::processInput(GLFWwindow *window)
-{
+{ 
+    Application* self = static_cast<Application*>(glfwGetWindowUserPointer(window));
     // Implement input processing here
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+    // Camera movement
+    if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        self->camera.ProcessKeyboard(FORWARD, self->deltaTime);
+    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        self->camera.ProcessKeyboard(BACKWARD, self->deltaTime);
+    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        self->camera.ProcessKeyboard(LEFT, self->deltaTime);
+    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        self->camera.ProcessKeyboard(RIGHT, self->deltaTime);
+
 
 }
 
@@ -89,15 +106,17 @@ void Application::run()
     while(!glfwWindowShouldClose(this->window))
     {
         float currentFrame = static_cast<float>(glfwGetTime());
-        float deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
+        this->deltaTime = currentFrame - this->lastFrame;
+        this->lastFrame = currentFrame;
 
         processInput(this->window);
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glm::mat4 projection = glm::perspective(glm::radians(this->camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 view = this->camera.GetViewMatrix();
 
-        onUpdate(deltaTime);
-        onRender();
+        onUpdate(this->deltaTime);
+        onRender(view, projection);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
