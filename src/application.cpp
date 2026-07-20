@@ -37,15 +37,11 @@ Application::Application(int width, int height, const char* title){
     } 
     glEnable(GL_DEPTH_TEST);
     ourShader = new Shader("shaders/camera.vs", "shaders/camera.fs");
-    char cwd[256];
-_getcwd(cwd, sizeof(cwd));
-std::cout << "Working dir: " << cwd << std::endl;
-   
 
 }
 
 Application::~Application(){
-    delete ourShader;
+
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
@@ -112,8 +108,12 @@ void Application::run()
         processInput(this->window);
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        ourShader->use();
         glm::mat4 projection = glm::perspective(glm::radians(this->camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        ourShader->setMat4("projection", projection);
+        
         glm::mat4 view = this->camera.GetViewMatrix();
+        ourShader->setMat4("view", view);
 
         onUpdate(this->deltaTime);
         onRender(view, projection);

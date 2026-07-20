@@ -14,8 +14,9 @@ class Game : public Application
 public:
     Game(int width, int height, const char *title) : Application(width, height, title)
     {
-        objects.push_back(std::unique_ptr<Ball>(new Ball(0.0f, 0.0f, 0.2f, 20.0f)));
-        std::cout << "Game initialized with " << objects.size() << " objects." << std::endl;
+        objects.push_back(std::unique_ptr<Ball>(new Ball(0.0f, 0.0f, 0.2f, 1.0f,36, 18, true, 3)));
+        //  DEBUGGING PURPOSES:
+        //std::cout << "Game initialized with " << objects.size() << " objects." << std::endl;
     }
     void onUpdate(float deltaTime) override
     {
