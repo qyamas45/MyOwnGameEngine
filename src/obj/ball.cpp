@@ -47,7 +47,7 @@ void Ball::onCollision(Collider* other, const float& dt)
     glm::vec3 vr;
     switch(other->getColliderType())
     {
-        case Collider::colliderTypes::SPHERE:
+        case Collider::colliderTypes::SPHERE: {
             sphereCollider* sphere = dynamic_cast<sphereCollider*>(other);
             if (!sphere)
                 return;
@@ -71,9 +71,13 @@ void Ball::onCollision(Collider* other, const float& dt)
             
           
             float vn = glm::dot(velocity, normal);
+       
             if (vn < 0.0f)
                 velocity -= 2.0f * vn * normal;
             updateCollider();
+            break;
+        }
+        default:
             break;
     }
 }
