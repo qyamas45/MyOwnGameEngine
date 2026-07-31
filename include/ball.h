@@ -2,6 +2,8 @@
 #define BALL_H
 #include "entity.h"
 #include "shader.h"
+#include "collider.h"
+#include "collider/sphereCollider.h"
 #include <vector>
 #include <shader.h>
 class Ball : public Entity {
@@ -11,9 +13,13 @@ public:
     ~Ball();
     void setupMesh(float, int, int, bool, int);
 
+    Collider* getCollider() { return collider->get(); }
+    void setVelocity(const glm::vec3& v) { velocity = v; }
     void update(float deltaTime) override;
-
- 
+    void updateCollider() override;
+    bool objectCollision(Collider* other);
+    void onCollision(Collider* other, const float& dt);
+    
     void buildVerticesSmooth();
     void buildVerticesFlat();
     void clearArrays();
@@ -58,12 +64,18 @@ public:
     const float* getTexCoords() const           { return texCoords.data(); }
     const unsigned int* getIndices() const      { return indices.data(); }
     const unsigned int* getLineIndices() const  { return lineIndices.data(); }
-
+    void debug() 
+    {
+        std::cout << glm::to_string(position) << std::endl;
+    }
 private:
+  
     Shader shader = nullptr;
     unsigned int VAO, VBO, EBO;
     float x, y, z, radius;
- 
+
+    glm::vec3 position;
+    glm::vec3 velocity{0.0f};
     int sectorCount; //longtitude
     int stackCount; //latitude
     bool smooth;
@@ -73,9 +85,11 @@ private:
     std::vector<float>texCoords;
     std::vector<unsigned int> indices;
     std::vector<unsigned int> lineIndices;
-
     std::vector<float>interleavedVertices;
     int interleavedStride;
+    
+    sphereCollider* collider;
+   
 };
 
 #endif

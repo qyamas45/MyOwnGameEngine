@@ -83,6 +83,10 @@ void Application::processInput(GLFWwindow *window)
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     // Camera movement
+    if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) || glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT))
+        self->camera.MovementSpeed = 15.0f;
+    else
+        self->camera.MovementSpeed = self->camera.SPEED;
     if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         self->camera.ProcessKeyboard(FORWARD, self->deltaTime);
     if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)

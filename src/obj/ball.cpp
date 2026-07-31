@@ -1,15 +1,21 @@
 
 #include "ball.h"
 #include <cmath>
+#include "collisionDetection.h"
 const int MIN_SECTOR_COUNT = 2;
 const int MIN_STACK_COUNT  = 2;
 
-Ball::Ball(float x, float y, float z, float radius, int sectors, int stacks, bool smooth, int up) : x(x), y(y), 
-z(z), radius(radius), interleavedStride(32),  shader(Shader("shaders/ball.vs", "shaders/ball.fs")) {
+Ball::Ball(float x, float y, float z, float radius, int sectors, int stacks, bool smooth, int up) :  
+radius(radius), interleavedStride(32),  
+collider(new sphereCollider(glm::vec3(x,y,z), radius)),
+shader(Shader("shaders/ball.vs", "shaders/ball.fs")) {
 
+
+    position = glm::vec3(x,y,z);
     setupMesh(radius, sectors, stacks, smooth, up);
 
 }
+
 void Ball::clearArrays()
 {
     std::vector<float>().swap(vertices);
@@ -17,6 +23,59 @@ void Ball::clearArrays()
     std::vector<float>().swap(texCoords);
     std::vector<unsigned int>().swap(indices);
     std::vector<unsigned int>().swap(lineIndices);
+}
+void Ball::updateCollider()
+{
+    collider->position = position;
+}
+bool Ball::objectCollision(Collider* other)
+{
+    bool res{0};
+    switch(other->getColliderType())
+    {
+        case Collider::colliderTypes::SPHERE:
+            res = collisionDetection::SphereSphereIntersection(
+                this->collider, dynamic_cast<sphereCollider*>(other)
+            );
+            break;
+    }
+    return res;
+}
+void Ball::onCollision(Collider* other, const float& dt)
+{
+    glm::vec3 normal;
+    glm::vec3 vr;
+    switch(other->getColliderType())
+    {
+        case Collider::colliderTypes::SPHERE:
+            sphereCollider* sphere = dynamic_cast<sphereCollider*>(other);
+            if (!sphere)
+                return;
+            glm::vec3 delta = position - sphere->position;
+            float dist2 = glm::dot(delta, delta);
+            glm::vec3 normal;
+            float penetration;
+            if(dist2 < 1e-8f)
+            {
+                normal = glm::vec3(0.0f, 0.005f, 0.0f);
+                penetration = radius + sphere->radius;
+            }
+            else
+            {
+                float dist = std::sqrt(dist2);
+                normal = delta/dist;
+                penetration = (radius + sphere->radius) - dist;
+            }
+            if (penetration > 0)
+                position += normal * penetration;
+            
+          
+            float vn = glm::dot(velocity, normal);
+            if (vn < 0.0f)
+                velocity -= 2.0f * vn * normal;
+            updateCollider();
+            break;
+    }
 }
 
 void Ball::addVertex(float x, float y, float z)
@@ -178,6 +237,7 @@ Ball::~Ball() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
+    delete collider;
 }
 
 void Ball::setupMesh(float radius, int sectors, int stacks, bool smooth, int up) {
@@ -472,14 +532,17 @@ void Ball::buildVerticesSmooth(){
     if(this->upAxis != 3)
         changeUpAxis(3, this->upAxis);
 }
+ 
 void Ball::update(float deltaTime) {
     // Update ball position or state if needed
+    position += velocity * deltaTime;
+    updateCollider();
 }
 void Ball::render(const glm::mat4& view, const glm::mat4& projection) {
 
     shader.use();
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(x, y, z));
+    model = glm::translate(model, position);
     shader.setMat4("model", model);
     shader.setMat4("view", view);
     shader.setMat4("projection", projection);

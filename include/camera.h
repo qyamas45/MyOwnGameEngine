@@ -25,6 +25,7 @@ const float ZOOM        =  45.0f;
 class Camera
 {
 public:
+    const float SPEED = 2.5f;
     // camera Attributes
     glm::vec3 Position;
     glm::vec3 Front;

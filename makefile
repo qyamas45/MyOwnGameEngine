@@ -7,16 +7,16 @@ CXXFLAGS = -Wall -g -Wextra -std=c++11
 # Linker flags for OpenGL and GLUT
 LDFLAGS = -Llibs -lopengl32 -lglfw3dll
 
-INCLUDES = -Iinclude -Iinclude/core -Iinclude/game
+INCLUDES = -Iinclude -Iinclude/core -Iinclude/game -Iinclude/collider
 
 # Target executable
 TARGET = program
 
 # Source files (objects/*.cpp are #included by main.cpp, not compiled separately)
-SRCS = src/main.cpp glad.c src/application.cpp src/obj/ball.cpp 
+SRCS = src/main.cpp glad.c src/application.cpp src/obj/ball.cpp  src/collider.cpp src/collisionDetection.cpp
 
 # Object files
-OBJS = src/main.o glad.o src/application.o src/obj/ball.o
+OBJS = src/main.o glad.o src/application.o src/obj/ball.o src/collider.o src/collisionDetection.o
 # Default target
 all: $(TARGET)
 
