@@ -1,17 +1,19 @@
 
-#include "ball.h"
+#include "objs/ball.h"
 #include <cmath>
 #include "collisionDetection.h"
 const int MIN_SECTOR_COUNT = 2;
 const int MIN_STACK_COUNT  = 2;
 
-Ball::Ball(float x, float y, float z, float radius, int sectors, int stacks, bool smooth, int up) :  
-radius(radius), interleavedStride(32),  
-collider(new sphereCollider(glm::vec3(x,y,z), radius)),
-shader(Shader("shaders/ball.vs", "shaders/ball.fs")) {
+Ball::Ball(float x, float y, float z, float radius, int sectors, int stacks, bool smooth, int up) :
+radius(radius), interleavedStride(32) {
 
-
+    // Entity's members, set here rather than in the init list (they belong
+    // to the base and are already constructed by this point).
     position = glm::vec3(x,y,z);
+    collider = new sphereCollider(position, radius);
+    shader   = &ownShader;
+
     setupMesh(radius, sectors, stacks, smooth, up);
 
 }
@@ -26,7 +28,7 @@ void Ball::clearArrays()
 }
 void Ball::updateCollider()
 {
-    collider->position = position;
+    sphere()->position = position;
 }
 bool Ball::objectCollision(Collider* other)
 {
@@ -35,8 +37,10 @@ bool Ball::objectCollision(Collider* other)
     {
         case Collider::colliderTypes::SPHERE:
             res = collisionDetection::SphereSphereIntersection(
-                this->collider, dynamic_cast<sphereCollider*>(other)
+                sphere(), dynamic_cast<sphereCollider*>(other)
             );
+            break;
+        default:
             break;
     }
     return res;
@@ -55,8 +59,10 @@ void Ball::onCollision(Collider* other, const float& dt)
             float dist2 = glm::dot(delta, delta);
             glm::vec3 normal;
             float penetration;
+            std::cout << dist2 << std::endl;
             if(dist2 < 1e-8f)
             {
+                std::cout << "Collision detected at the same position!" << std::endl;
                 normal = glm::vec3(0.0f, 0.005f, 0.0f);
                 penetration = radius + sphere->radius;
             }
@@ -544,13 +550,13 @@ void Ball::update(float deltaTime) {
 }
 void Ball::render(const glm::mat4& view, const glm::mat4& projection) {
 
-    shader.use();
+    shader->use();
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, position);
-    shader.setMat4("model", model);
-    shader.setMat4("view", view);
-    shader.setMat4("projection", projection);
-    shader.setVec3("color", glm::vec3(1.0f, 0.0f, 0.0f));
+    shader->setMat4("model", model);
+    shader->setMat4("view", view);
+    shader->setMat4("projection", projection);
+    shader->setVec3("color", glm::vec3(1.0f, 0.0f, 0.0f));
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, (unsigned int)indices.size(), GL_UNSIGNED_INT, 0);

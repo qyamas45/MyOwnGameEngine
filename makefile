@@ -13,10 +13,10 @@ INCLUDES = -Iinclude -Iinclude/core -Iinclude/game -Iinclude/collider
 TARGET = program
 
 # Source files (objects/*.cpp are #included by main.cpp, not compiled separately)
-SRCS = src/main.cpp glad.c src/application.cpp src/obj/ball.cpp  src/collider.cpp src/collisionDetection.cpp
+SRCS = src/main.cpp glad.c src/application.cpp src/obj/ball.cpp src/obj/cube.cpp src/collider.cpp src/collisionDetection.cpp
 
 # Object files
-OBJS = src/main.o glad.o src/application.o src/obj/ball.o src/collider.o src/collisionDetection.o
+OBJS = src/main.o glad.o src/application.o src/obj/ball.o src/obj/cube.o src/collider.o src/collisionDetection.o
 # Default target
 all: $(TARGET)
 

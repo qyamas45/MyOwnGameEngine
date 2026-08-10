@@ -11,14 +11,14 @@ public:
     Ball(float x, float y, float z, float radius, 
         int, int, bool, int);
     ~Ball();
-    void setupMesh(float, int, int, bool, int);
+    
 
-    Collider* getCollider() { return collider->get(); }
+    Collider* getCollider() override { return collider; }
     void setVelocity(const glm::vec3& v) { velocity = v; }
     void update(float deltaTime) override;
     void updateCollider() override;
     bool objectCollision(Collider* other);
-    void onCollision(Collider* other, const float& dt);
+    void onCollision(Collider* other, const float& dt) override;
     
     void buildVerticesSmooth();
     void buildVerticesFlat();
@@ -64,17 +64,25 @@ public:
     const float* getTexCoords() const           { return texCoords.data(); }
     const unsigned int* getIndices() const      { return indices.data(); }
     const unsigned int* getLineIndices() const  { return lineIndices.data(); }
-    void debug() 
+    void debug() override
     {
         std::cout << glm::to_string(position) << std::endl;
     }
 private:
-  
-    Shader shader = nullptr;
-    unsigned int VAO, VBO, EBO;
-    float x, y, z, radius;
+    void setupMesh(float, int, int, bool, int);
+    // shader, position, collider and anchor are inherited from Entity.
 
-    glm::vec3 position;
+    // Ball's own shader; Entity::shader points at it unless setTexture()
+    // swaps in an externally owned one.
+    Shader ownShader{"shaders/ball.vs", "shaders/ball.fs"};
+
+    // Entity stores the collider as a base pointer; Ball always builds a
+    // sphereCollider, so this is the typed view of it.
+    sphereCollider* sphere() const { return static_cast<sphereCollider*>(collider); }
+
+    unsigned int VAO, VBO, EBO;
+    float radius;
+
     glm::vec3 velocity{0.0f};
     int sectorCount; //longtitude
     int stackCount; //latitude
@@ -87,9 +95,6 @@ private:
     std::vector<unsigned int> lineIndices;
     std::vector<float>interleavedVertices;
     int interleavedStride;
-    
-    sphereCollider* collider;
-   
 };
 
 #endif
