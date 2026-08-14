@@ -2,3 +2,5 @@
 program.exe
 *.o
 src/*.o
+.idea
+NUL

@@ -59,10 +59,10 @@ void Ball::onCollision(Collider* other, const float& dt)
             float dist2 = glm::dot(delta, delta);
             glm::vec3 normal;
             float penetration;
-            std::cout << dist2 << std::endl;
+            //std::cout << dist2 << std::endl;
             if(dist2 < 1e-8f)
             {
-                std::cout << "Collision detected at the same position!" << std::endl;
+                //std::cout << "Collision detected at the same position!" << std::endl;
                 normal = glm::vec3(0.0f, 0.005f, 0.0f);
                 penetration = radius + sphere->radius;
             }

@@ -20,8 +20,10 @@ public:
     colliderTypes getColliderType() const{
         return colliderType;
     }
+    
     virtual Collider* get() = 0;
 private:
 colliderTypes colliderType;
+
 };
 #endif 

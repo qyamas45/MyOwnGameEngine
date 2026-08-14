@@ -20,7 +20,7 @@ void updateCollisions(std::vector<std::unique_ptr<Entity>>& objects, float delta
             Collider* a = objects[i]->getCollider();
             Collider* b = objects[j]->getCollider();
 
-            // Entities without a collider (e.g. Cube) don't participate.
+            // Entities without a collider don't participate.
             if(!a || !b)
                 continue;
 
@@ -40,18 +40,22 @@ public:
     {
         objects.push_back(std::unique_ptr<Ball>(new Ball(0.0f, 0.0f, 0.2f, 1.0f,36, 18, true, 3)));
         objects.push_back(std::unique_ptr<Ball>(new Ball(0.0f, 3.0f, 0.2f, 1.0f,36, 18, true, 3)));
-        objects.push_back(std::unique_ptr<Cube>(new Cube(glm::vec3(-2.0f, 0.0f, -2.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 0.5f, 0.31f), 45.0f, false)));
+        objects.push_back(std::unique_ptr<Cube>(new Cube(glm::vec3(-0.0f, -3.0f, 0.2f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 0.5f, 0.31f), 45.0f, false)));
+        objects.push_back(std::unique_ptr<Cube>(new Cube(glm::vec3(-0.0f, 0.1f, 0.2f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 0.5f, 0.31f), 45.0f, false)));
         //  DEBUGGING PURPOSES:
         //std::cout << "Game initialized with " << objects.size() << " objects." << std::endl;
     }
     void onUpdate(float deltaTime) override
     {
+ 
         // Update game logic here
         for (auto &obj : objects)
         {
             obj->update(deltaTime);
             //obj->debug();
         }
+        //debugging to check collisions
+        //objects[3]->setPosition(glm::vec3(0.0f, val, 0.0f));
         updateCollisions(objects, deltaTime);
     }
     void onRender(const glm::mat4& view, const glm::mat4& projection) override
@@ -64,7 +68,7 @@ public:
     
 private:
     std::vector<std::unique_ptr<Entity>> objects;
-
+ 
     
 };
 

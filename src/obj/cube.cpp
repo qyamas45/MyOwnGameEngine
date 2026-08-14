@@ -1,4 +1,5 @@
 #include "objs/cube.h"
+#include <algorithm>
 
 
 Cube::Cube(glm::vec3 position, glm::vec3 scale, glm::vec3 rotationAxis, glm::vec3 color, float rotationAngle, bool useCustomColor)
@@ -7,26 +8,29 @@ Cube::Cube(glm::vec3 position, glm::vec3 scale, glm::vec3 rotationAxis, glm::vec
     // to the base and are already constructed by this point).
     this->position = position;
     this->shader   = &ownShader;
+    // The mesh spans -scale..+scale on each axis, so the half-extents are
+    // scale itself.
+    this->collider = new cubeCollider(position, scale);
 
     setupMesh();
 }
+
 void Cube::setupMesh()
 {
     //Create a cube with vertices and indices
-    float halfScaleX = scale.x / 2.0f;
-    float halfScaleY = scale.y / 2.0f;
-    float halfScaleZ = scale.z / 2.0f;
+ 
     vertices = {
         // positions          
-        -halfScaleX, -halfScaleY, -halfScaleZ,
-         halfScaleX, -halfScaleY, -halfScaleZ,
-         halfScaleX,  halfScaleY, -halfScaleZ,
-        -halfScaleX,  halfScaleY, -halfScaleZ,
-        -halfScaleX, -halfScaleY,  halfScaleZ,
-         halfScaleX, -halfScaleY,  halfScaleZ,
-         halfScaleX,  halfScaleY,  halfScaleZ,
-        -halfScaleX,  halfScaleY,  halfScaleZ
+        -scale.x, -scale.y, -scale.z,
+         scale.x, -scale.y, -scale.z,
+         scale.x,  scale.y, -scale.z,
+        -scale.x,  scale.y, -scale.z,
+        -scale.x, -scale.y,  scale.z,
+         scale.x, -scale.y,  scale.z,
+         scale.x,  scale.y,  scale.z,
+        -scale.x,  scale.y,  scale.z
     };
+
     // 12 triangles, 2 per face. Wound counter-clockwise as seen from outside
     // the cube, which is OpenGL's default front-facing orientation.
     indices = {
@@ -53,29 +57,89 @@ void Cube::setupMesh()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
+    glBindVertexArray(0);
 }
 Cube::~Cube() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
+    delete collider;
 }
 
 void Cube::clearArrays()
 {
     std::vector<float>().swap(vertices);
     std::vector<unsigned int>().swap(indices);
+
 }
-void Cube::update(float)
+void Cube::update(float dt)
 {
     // static for now
+    position += velocity * dt;
+    updateCollider();
 }
 void Cube::updateCollider()
 {
-    // no collider yet
+    cube()->position = position;
+    cube()->halfExtents = scale;
+
 }
-void Cube::onCollision(Collider*, const float&)
+bool Cube::objectCollision(Collider* other)
 {
-    // no collider yet, so this is never reached
+    switch (other->getColliderType())
+    {
+        case Collider::colliderTypes::SPHERE:
+            return collisionDetection::SphereCubeIntersection(dynamic_cast<sphereCollider*>(other), cube());
+        case Collider::colliderTypes::CUBE:
+            return collisionDetection::CubeCubeIntersection(cube(), dynamic_cast<cubeCollider*>(other));
+        default:
+            return false;
+    }
+}
+void Cube::onCollision(Collider* other, const float& dt)
+{
+    switch(other->getColliderType())
+    {
+        case Collider::colliderTypes::CUBE:{
+            cubeCollider* otherCube = dynamic_cast<cubeCollider*>(other);
+            if (!otherCube)
+                return;
+
+            const glm::vec3 minA = cube()->getMinCoordinates();
+            const glm::vec3 maxA = cube()->getMaxCoordinates();
+            const glm::vec3 minB = otherCube->getMinCoordinates();
+            const glm::vec3 maxB = otherCube->getMaxCoordinates();
+
+            // How deep the two boxes overlap on each axis. Positive on all
+            // three axes means they really do intersect.
+            glm::vec3 overlap;
+            for (int i = 0; i < 3; ++i)
+                overlap[i] = std::min(maxA[i], maxB[i]) - std::max(minA[i], minB[i]);
+
+            if (overlap.x <= 0.0f || overlap.y <= 0.0f || overlap.z <= 0.0f)
+                return;
+
+            // The shallowest axis is the shortest way out (minimum translation
+            // vector); pushing along any other axis would move further than needed.
+            int axis = 0;
+            if (overlap.y < overlap[axis]) axis = 1;
+            if (overlap.z < overlap[axis]) axis = 2;
+
+            // Push away from the other cube. Coincident centres fall back to
+            // the positive direction so the pair still separates.
+            const float sign = (position[axis] < otherCube->position[axis]) ? -1.0f : 1.0f;
+
+            // Half each: the other entity resolves the same pair from its side.
+            position[axis] += sign * overlap[axis] * 0.5f;
+
+            updateCollider();
+            break;
+        }
+        default:
+            break;
+    }
+
+ 
 }
 void Cube::setColor(glm::vec3 color)
 {
