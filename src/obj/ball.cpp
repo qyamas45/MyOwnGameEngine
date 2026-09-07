@@ -83,6 +83,38 @@ void Ball::onCollision(Collider* other, const float& dt)
             updateCollider();
             break;
         }
+        case Collider::colliderTypes::CUBE:{
+            // Handle collision with a cube
+            cubeCollider* cube = dynamic_cast<cubeCollider*>(other);
+            if (!cube)
+                return;
+            //get the min and max coordinates of the cube
+            const glm::vec3& cubeMin = cube->getMinCoordinates();
+            const glm::vec3& cubeMax = cube->getMaxCoordinates();
+
+            // Find the closest point on the cube to the sphere's center
+            glm::vec3 closestPoint;
+            closestPoint.x = std::max(cubeMin.x, std::min(position.x, cubeMax.x));
+            closestPoint.y = std::max(cubeMin.y, std::min(position.y, cubeMax.y));
+            closestPoint.z = std::max(cubeMin.z, std::min(position.z, cubeMax.z));
+
+            // Calculate the distance from the sphere's center to the closest point
+            float distanceSquared = glm::dot(closestPoint - position, closestPoint - position);
+            // Check if the distance is less than or equal to the square of the radius
+            if (distanceSquared >= (radius * radius))
+                return; // No collision
+            
+            float distance = std::sqrt(distanceSquared);
+            float penetrationDepth = radius - distance;
+            if (penetrationDepth <= 0.0f)
+                return; // No collision
+            
+            // Move the sphere out of the cube along the collision normal
+            glm::vec3 collisionNormal = (position - closestPoint) / distance;
+            position += collisionNormal * penetrationDepth;
+            updateCollider();
+            break;
+        }
         default:
             break;
     }

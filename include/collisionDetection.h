@@ -13,6 +13,7 @@ class cubeCollider;
 namespace collisionDetection
 {
     bool SphereSphereIntersection(sphereCollider* s0, sphereCollider* s1);
+    bool CubeSphereIntersection(cubeCollider* c, sphereCollider* s);
     bool SphereCubeIntersection(sphereCollider* s, cubeCollider* c);
     bool CubeCubeIntersection(cubeCollider* c0, cubeCollider* c1);
 };

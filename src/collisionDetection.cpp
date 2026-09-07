@@ -13,16 +13,6 @@ bool collisionDetection::SphereSphereIntersection(sphereCollider* s0, sphereColl
     return dist2 <= (rSum*rSum);
 
 }
-
-bool collisionDetection::SphereCubeIntersection(sphereCollider* s, cubeCollider* c)
-{
-    
-    // Implement sphere-cube intersection logic here
-
-
-    return false; // Placeholder
-}
-
 bool collisionDetection::CubeCubeIntersection(cubeCollider* c0, cubeCollider* c1)
 {
     //A cube (or rectangular cuboid) is defined by its minimum coordinates 
@@ -46,4 +36,48 @@ bool collisionDetection::CubeCubeIntersection(cubeCollider* c0, cubeCollider* c1
 
     // Implement cube-cube intersection logic here
     return false; // Placeholder
+}
+bool collisionDetection::CubeSphereIntersection(cubeCollider* c, sphereCollider* s)
+{
+    // Get the sphere's center and radius
+    const glm::vec3& sphereCenter = s->position;
+    const float& sphereRadius = s->radius;
+
+    // Get the cube's min and max coordinates
+    const glm::vec3& cubeMin = c->getMinCoordinates();
+    const glm::vec3& cubeMax = c->getMaxCoordinates();
+
+    // Find the closest point on the cube to the sphere's center
+    glm::vec3 closestPoint;
+    closestPoint.x = std::max(cubeMin.x, std::min(sphereCenter.x, cubeMax.x));
+    closestPoint.y = std::max(cubeMin.y, std::min(sphereCenter.y, cubeMax.y));
+    closestPoint.z = std::max(cubeMin.z, std::min(sphereCenter.z, cubeMax.z));
+
+    // Calculate the distance from the sphere's center to the closest point
+    float distanceSquared = glm::dot(closestPoint - sphereCenter, closestPoint - sphereCenter);
+
+    // Check if the distance is less than or equal to the square of the radius
+    return distanceSquared <= (sphereRadius * sphereRadius);
+}
+bool collisionDetection::SphereCubeIntersection(sphereCollider* s, cubeCollider* c)
+{
+    // Get the sphere's center and radius
+    const glm::vec3& sphereCenter = s->position;
+    const float& sphereRadius = s->radius;
+
+    // Get the cube's min and max coordinates
+    const glm::vec3& cubeMin = c->getMinCoordinates();
+    const glm::vec3& cubeMax = c->getMaxCoordinates();
+
+    // Find the closest point on the cube to the sphere's center
+    glm::vec3 closestPoint;
+    closestPoint.x = std::max(cubeMin.x, std::min(sphereCenter.x, cubeMax.x));
+    closestPoint.y = std::max(cubeMin.y, std::min(sphereCenter.y, cubeMax.y));
+    closestPoint.z = std::max(cubeMin.z, std::min(sphereCenter.z, cubeMax.z));
+
+    // Calculate the distance from the sphere's center to the closest point
+    float distanceSquared = glm::dot(closestPoint - sphereCenter, closestPoint - sphereCenter);
+
+    // Check if the distance is less than or equal to the square of the radius
+    return distanceSquared <= (sphereRadius * sphereRadius);
 }
