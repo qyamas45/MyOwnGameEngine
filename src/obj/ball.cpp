@@ -47,8 +47,6 @@ bool Ball::objectCollision(Collider* other)
 }
 void Ball::onCollision(Collider* other, const float& dt)
 {
-    glm::vec3 normal;
-    glm::vec3 vr;
     switch(other->getColliderType())
     {
         case Collider::colliderTypes::SPHERE: {
@@ -72,8 +70,9 @@ void Ball::onCollision(Collider* other, const float& dt)
                 normal = delta/dist;
                 penetration = (radius + sphere->radius) - dist;
             }
+            // Half each: the other entity resolves the same pair from its side.
             if (penetration > 0)
-                position += normal * penetration;
+                position += normal * penetration * 0.5f;
             
           
             float vn = glm::dot(velocity, normal);
@@ -106,12 +105,28 @@ void Ball::onCollision(Collider* other, const float& dt)
             
             float distance = std::sqrt(distanceSquared);
             float penetrationDepth = radius - distance;
+           
             if (penetrationDepth <= 0.0f)
                 return; // No collision
             
-            // Move the sphere out of the cube along the collision normal
-            glm::vec3 collisionNormal = (position - closestPoint) / distance;
-            position += collisionNormal * penetrationDepth;
+            // Degenerate contact: the centre sits exactly on the cube's
+            // surface, so there is no direction to push along. Dividing by
+            // this would produce NaN and poison the position permanently.
+            if (distance < 1e-6f)
+                return;
+
+            // Move the sphere out of the cube along the collision normal.
+            // Half each: the cube resolves the same pair from its side.
+            glm::vec3 normal = (position - closestPoint) / distance;
+
+            position += normal * penetrationDepth * 0.5f;
+
+            // Reflect the incoming velocity so the ball bounces instead of
+            // sliding along the face it just hit.
+            float vn = glm::dot(velocity, normal);
+            if (vn < 0.0f)
+                velocity -= 2.0f * vn * normal;
+
             updateCollider();
             break;
         }

@@ -27,8 +27,20 @@ void updateCollisions(std::vector<std::unique_ptr<Entity>>& objects, float delta
             if(a->objectCollision(b))
             {
                 //std::cout << "HIT: " << i << " <-> " << j << std::endl;
+
+                // Both sides must resolve against the SAME pre-contact state.
+                // onCollision() writes its correction into the collider, so
+                // letting i go first would hand j a pair that no longer
+                // overlaps and j would early-out without moving. Rewind i
+                // while j resolves, then re-apply i's correction.
+                const glm::vec3 preA = objects[i]->getPosition();
+
                 objects[i]->onCollision(b, deltaTime);
+                const glm::vec3 resolvedA = objects[i]->getPosition();
+
+                objects[i]->setPosition(preA);
                 objects[j]->onCollision(a, deltaTime);
+                objects[i]->setPosition(resolvedA);
             }
         }
     }
@@ -47,7 +59,7 @@ public:
     }
     void onUpdate(float deltaTime) override
     {
-        val += 0.01f;
+        val -= 0.01f;
         // Update game logic here
         for (auto &obj : objects)
         {
@@ -55,7 +67,7 @@ public:
             //obj->debug();
         }
         //debugging to check collisions
-        objects[1]->setPosition(glm::vec3(0.0f, val, 0.0f));
+        //objects[0]->setPosition(glm::vec3(0.0f, val, 0.0f));
         updateCollisions(objects, deltaTime);
     }
     void onRender(const glm::mat4& view, const glm::mat4& projection) override
@@ -68,7 +80,7 @@ public:
     
 private:
     std::vector<std::unique_ptr<Entity>> objects;
-    float  val = 0.0f;
+    float  val = 6.0f;
     
 };
 

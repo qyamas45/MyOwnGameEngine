@@ -153,10 +153,6 @@ void Cube::onCollision(Collider *other, const float &dt)
         closestPoint.z = std::max(cube()->getMinCoordinates().z, std::min(sphereCenter.z, cube()->getMaxCoordinates().z));
 
         // Calculate the distance from the sphere's center to the closest point
-
-        //when collide and stops, it can cause to output 4.26758e-09, is there a fix?
-        //based on the idea, it works, it just that the ball phsyics needs to be implemented on the cube.
-        
         float distanceSquared = glm::dot(closestPoint - sphereCenter, closestPoint - sphereCenter);
         ///std::cout << "distanceSquared: " << distanceSquared << std::endl;
         //std::cout << "sphereRadius * sphereRadius: " << sphereRadius * sphereRadius << std::endl;
@@ -173,8 +169,14 @@ void Cube::onCollision(Collider *other, const float &dt)
         if (penetrationDepth <= 0.0f)
             return; // No collision
 
-        position += (closestPoint - sphereCenter) / distance * penetrationDepth;
-        //std::cout << position.x << " " << position.y << " " << position.z << std::endl;
+        // The sphere's centre lies exactly on the surface: no direction to
+        // push along, and dividing by it would yield NaN. Guard up front
+        // rather than repairing the position afterwards.
+        if (distance < 1e-6f)
+            return;
+
+        // Half each: the sphere resolves the same pair from its side.
+        position += (closestPoint - sphereCenter) / distance * penetrationDepth * 0.5f;
         updateCollider();
         break;
     }
