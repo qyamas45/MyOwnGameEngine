@@ -1,3 +1,6 @@
+GLFW_PREFIX := $(shell brew --prefix glfw)
+FREETYPE_PREFIX := $(shell brew --prefix freetype)
+
 # Compiler
 CXX = g++
 
@@ -5,9 +8,17 @@ CXX = g++
 CXXFLAGS = -Wall -g -Wextra -std=c++11
 
 # Linker flags for OpenGL and GLUT
-LDFLAGS = -Llibs -lopengl32 -lglfw3dll
+LDFLAGS = \
+	-L$(GLFW_PREFIX)/lib \
+	-L$(FREETYPE_PREFIX)/lib \
+	-lglfw \
+	-lfreetype \
+	-framework OpenGL \
+	-framework Cocoa \
+	-framework IOKit \
+	-framework CoreVideo \
 
-INCLUDES = -Iinclude -Iinclude/core -Iinclude/game -Iinclude/collider
+INCLUDES = -Iinclude -Iinclude/core -Iinclude/game -I$(GLFW_PREFIX)/include -I$(FREETYPE_PREFIX)/include 
 
 # Target executable
 TARGET = program

@@ -4,3 +4,4 @@ program.exe
 src/*.o
 .idea
 NUL
+makefile

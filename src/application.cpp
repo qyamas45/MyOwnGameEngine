@@ -1,5 +1,7 @@
 #include "application.h"
-#include <direct.h>  // Windows only
+#if defined(_WIN32) || defined(_WIN64)
+    #include <direct.h>  // Windows only
+#endif
 Application::Application(int width, int height, const char* title){
     
  
